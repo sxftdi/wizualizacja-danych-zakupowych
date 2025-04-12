@@ -19,7 +19,7 @@ Celem projektu jest analiza danych pochodzących ze sklepu odzieżowego w celu z
 ## Zawartość repozytorium
 
 - `projekt.html` – pełny raport z analizą
-- Zbiór danych: [Kaggle.com](https://www.kaggle.com)
+- Zbiór danych ze strony: [Kaggle.com](https://www.kaggle.com)
 
 ---
 
