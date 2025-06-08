@@ -1,0 +1,314 @@
+---
+output: html_document
+---
+<div style="text-align: center;">
+  <h1>Analiza Zachowań Zakupowych</h1>
+  <p>Autor: Diana Kalyniak</p> 
+</div>
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,message = FALSE,warning = FALSE)
+```
+
+ <h2 style="text-align: center;">**Badanie preferencji klientów w świecie odzieży**</h2>
+
+
+### Przeprowadzam analizę na podstawie danych ze sklepu odzieżowego.Celem mojego projektu jest zrozumienie zachowań klientów, analiza popularności produktów, badanie wpływu różnych czynników na zakupy.
+
+### Analiza zachowań klientów to proces badawczy, który odgrywa kluczową rolę w dzisiejszym świecie biznesu. Dzięki analizie danych z zakresu zachowań klientów, biznesy zdobywają nie tylko wgląd w preferencje, lecz także możliwość przewidywania trendów, doskonalenia oferty produktowej oraz usług, a także budowania lojalności klienta.Istotne jest zrozumienie, dlaczego klienci podejmują określone decyzje zakupow.
+
+### Dlaczego badania są tak ważne?
+
+* <span style="font-size: 150%;">Personalizacja Oferty</span>
+
+* <span style="font-size: 150%;">Przewidywanie trendów zakupowych</span>
+
+* <span style="font-size: 150%;">Budowania relacji z klientami</span>
+
+* <span style="font-size: 150%;">Ulepszanie procesów zakupowych</span>
+
+
+```{r}
+#Wczytanie database
+library(data.table)
+data <- fread("shopping.csv")
+
+
+# Wyodrębnienie kolumn
+dane <- data[, c("Customer ID", "Age", "Gender", "Item Purchased", "Category", "Purchase Amount (USD)", "Location", "Size", "Color", "Season", "Review Rating", "Shipping Type", "Payment Method", "Frequency of Purchases")]
+
+# Zmiana nazw kilku wybranych kolumn
+names(dane)[names(dane) == "Customer ID"] <- "ID"
+names(dane)[names(dane) == "Item Purchased"] <- "Item"
+names(dane)[names(dane) == "Review Rating"] <- "Review_Rating"
+names(dane)[names(dane) == "Purchase Amount (USD)"] <- "Cost_USD"
+names(dane)[names(dane) == "Shipping Type"] <- "Shipping_Type"
+names(dane)[names(dane) == "Payment Method"] <- "Payment_Method"
+names(dane)[names(dane) == "Frequency of Purchases"] <- "Frequency_of_Purchases"
+
+``` 
+
+
+<h2 style="text-align: center;">**Opinia klienta odgrywa ważną rolę**</h2> 
+### Rzetelne zrozumienie opinii klientów na temat produktów może dostarczyć wartościowych wskazówek dla biznesów, pozwalając na ciągłe doskonalenie i dostosowywanie się do potrzeb konsumentów.Wykres skrzynkowy pozwala na spojrzenie na rozkład ocen recenzji w różnych kategoriach.
+
+<div style="text-align:center">
+```{r}
+library(ggplot2)
+# Tworzenie wykresu skrzynkowego 
+kolor1 <- rgb(233, 168, 242, maxColorValue = 255) 
+kolor2 <- rgb(0,128,0, maxColorValue = 255) 
+kolor3 <- rgb(255,255,0, maxColorValue = 255) 
+kolor4 <- rgb(251, 139, 36, maxColorValue = 255) 
+
+ggplot(dane, aes(x = Category, y = Review_Rating, fill = Category)) +
+  geom_boxplot(color = "black") +  # Wykres skrzynkowy
+  labs(title = "Ocena recenzji w zależności od kategorii produktu", x = "Kategoria", y = "Ocena recenzji") +
+  theme(plot.title = element_text(hjust = 0.5))+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +  # Obrót etykiet osi X
+  scale_fill_manual(values = c(kolor1,kolor2,kolor3,kolor4))  # Określenie kolorów dla poszczególnych kategorii
+
+```
+</div>
+### Średnia ocen w kategoriach <span style="background-color: rgb(233, 168, 242);">akcesoriów</span>, <span style="background-color: rgb(255,255,0);">obuwia</span> i <span style="background-color: rgb(251, 139, 36);">odzieży wierzchniej</span> jest taka sama i wynosi 3.8,a w kategorii <span style="background-color: rgb(0,128,0);">odzieży</span> jest nieco niższa. Niestety w kategoriach odzieży wierzchniej i odzieży jest więcej negatywnych recenzji niż w pozostałych.To sugeruje , że sklep powinien zwrócić uwagę na kategorie odzieży i odzieży wierzchniej, poprawić ten obszar.
+
+
+<h2 style="text-align: center;">**Kobiety vs Mężczyźni:na kim się skupić?**</h2> 
+
+### Ważne jest, aby dokładnie zidentyfikować grupę docelową w kontekście zakupów. Często popełnianym błędem jest założenie, że jedynie kobiety cieszą się zakupami, podczas gdy w rzeczywistości grupa docelowa może obejmować również mężczyzn.
+
+<div style="text-align:center">
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# Stworzenie danych z podsumowaniem liczby zakupów dla każdej płci
+summary_data <- dane %>%
+  group_by(Gender) %>%
+  summarise(total_purchases = n())
+
+kolor1 <- rgb(255,255,0, maxColorValue = 255) 
+kolor2 <- rgb(0,128,0, maxColorValue = 255) 
+
+# Tworzenie wykresu pie chart
+ggplot(summary_data, aes(x = "", y = total_purchases, fill = Gender)) +
+  geom_bar(stat = "identity", width = 1, alpha = 0.7, colour = "black") +
+  coord_polar("y", start = 0) +
+  labs(title = "Udział procentowy zakupów według płci") +
+  theme_void() +
+  scale_fill_manual(values = c(kolor1, "orange"))+
+  theme(plot.title = element_text(hjust = 0.5))+
+  geom_text(aes(label = Gender), position = position_stack(vjust = 0.5))+  # Dodanie etykiet
+  guides(fill = 'none')   # Usunięcie legendy
+
+```
+</div>
+### Analiza danych zakupowych w tym sklepie wskazuje, że <span style="color:rgb(251, 139, 36);">mężczyźni</span>  również są aktywnymi konsumentami, co stanowi istotny czynnik przy kształtowaniu strategii marketingowych i ofert produktowych.
+
+<h2 style="text-align: center;">**Najpopularniejsze przedmioty**</h2> 
+### Tabela zawiera informacje o najpopularniejszych przedmiotach w danych. Zawiera kolumny z nazwami przedmiotów, ich kategoriami, średnimi kosztami oraz liczbą wystąpień każdego przedmiotu.
+```{r fig.align='center'}
+library(DT)
+najpopularniejszy_przedmiot <- dane %>%
+  group_by(Item) %>%
+  summarise(Category = unique(Category),
+            Cost = mean(Cost_USD, na.rm = TRUE),
+            Count = n()) %>%
+  arrange(desc(Count))
+
+najpopularniejszy_przedmiot$Cost <- sprintf("%.2f", najpopularniejszy_przedmiot$Cost)
+
+datatable(najpopularniejszy_przedmiot, 
+          options = list(pageLength = 10, lengthMenu = c(5, 10, 15, 20)))
+
+
+```
+###  Bluzki, biżuteria i spodnie  są najpopularniejsze, a największą wartość mają t-shirty.Zwiększenie dostępności i różnorodności tych produktów w magazynie może przynieść zyski. Warto skupić się na oferowanie promocji, rabatów na te towary.
+
+<h2 style="text-align: center;">**Wpływ wieku na zakupy**</h2> 
+### Wiek może wpływać na to, **ile średnio wydajemy** podczas zakupów i **jak często** robimy zakupy. Analiza ta pomaga w zrozumieniu preferencji oraz podejmowaniu decyzji biznesowych ukierunkowanych na konkretne grupy wiekowe.Możemy zauważyć, że osoby w wieku <span style="color: rgb(255, 0, 0) ">37-49</span> wydają <span style="color: rgb(255, 0, 0) ">najmniej</span> na zakupy modowe,ale najczęściej dokonują takich zakupów, natomiast osoby w wieku <span style="color: rgb(0,128,0); ">28-39</span> wydają <span style="color: rgb(0,128,0); ">najwięcej</span> .Istnieje duża różnica między największą a najmniejszą wartością,co pomaga zrozumieć, jaka jest grupa docelowa.
+![](2_wykresy.png){#image align="center"}
+
+<h2 style="text-align: center;">**Rozkład kwoty wydanej w różnych lokalizacjach**</h2> 
+### Zidentyfikowanie stanów, gdzie wydatki są szczególnie wysokie lub niskie, może mieć kluczowe znaczenie przy podejmowaniu decyzji biznesowych, takich jak lokalizacja nowych sklepów. Pokazano to na *interaktywnym* wykresie:
+
+<div style="text-align:center; display: flex; justify-content: center; align-items: center;">
+```{r fig.align='center',results='asis', message=FALSE}
+library(plotly)
+library(ggplot2)
+library(dplyr)
+
+# Połączenie z danymi dotyczącymi stanów
+state_codes <- data.frame(
+  state = c("Kentucky", "Maine", "Massachusetts", "Rhode Island", "Oregon", "Wyoming", "Montana", "Louisiana", "West Virginia", "Missouri", "Arkansas", "Hawaii", "Delaware", "New Hampshire", "New York", "Alabama", "Mississippi", "North Carolina", "California", "Oklahoma", "Florida", "Texas", "Nevada", "Kansas", "Colorado", "North Dakota", "Illinois", "Indiana", "Arizona", "Alaska", "Tennessee", "Ohio", "New Jersey", "Maryland", "Vermont", "New Mexico", "South Carolina", "Idaho", "Pennsylvania", "Connecticut", "Utah", "Virginia", "Georgia", "Nebraska", "Iowa", "South Dakota", "Minnesota", "Washington", "Wisconsin", "Michigan"),
+  state_code = c("KY", "ME", "MA", "RI", "OR", "WY", "MT", "LA", "WV", "MO", "AR", "HI", "DE", "NH", "NY", "AL", "MS", "NC", "CA", "OK", "FL", "TX", "NV", "KS", "CO", "ND", "IL", "IN", "AZ", "AK", "TN", "OH", "NJ", "MD", "VT", "NM", "SC", "ID", "PA", "CT", "UT", "VA", "GA", "NE", "IA", "SD", "MN", "WA", "WI", "MI")
+)
+
+# Zsumowanie Cost_USD ze wszystkich kategorii dla każdej lokalizacji
+sum_all_categories <- dane %>%
+  group_by(Location) %>%
+  summarise(total_cost_all_categories = sum(Cost_USD, na.rm = TRUE))
+
+# Połączenie danych ze stanami z kodami stanów
+sum_all_categories <- merge(sum_all_categories, state_codes, by.x = "Location", by.y = "state", all.x = TRUE)
+
+# Tworzenie interaktywnej mapy
+fig <- plot_geo(sum_all_categories, locationmode = 'USA-states')
+fig <- fig %>% add_trace(
+  z = ~total_cost_all_categories, text = ~paste(Location, '<br>', 'Total Cost:', total_cost_all_categories), locations = ~state_code,
+  color = ~total_cost_all_categories, colors = c('#FFFFFF', '#008000'), marker = list(line = list(color = toRGB("black"), width = 1)),
+  colorbar = list(title = "Price in USD")
+)
+
+fig <- fig %>% layout(
+  title = 'Karta USA z wydaną kwotą na zakupy',
+  geo = list(
+    scope = 'usa',
+    projection = list(type = 'albers usa'),
+    showlakes = TRUE,
+    lakecolor = toRGB('white')
+  )
+)
+
+fig
+```
+</div>
+### W takich stanach ludzie najbardziej lubią robić zakupy i wydają na nie najwięcej pieniędzy:***Montana,Idaho,Nevada,Clifornia,Illinois***
+
+
+<h2 style="text-align: center;">**Popularne rozmiary wśród klientów**</h2> 
+
+```{r fig.align='center'}
+library(DT)
+library(dplyr)
+
+# Tworzenie tabeli zależności pomiędzy Size a liczbą Item
+tabela_zaleznosci <- dane %>%
+  count(Size) %>%
+  rename(Ilosc = n)
+
+# Tworzenie interaktywnej tabeli z podświetleniem wierszy
+interaktywna_tabela <- datatable(
+  tabela_zaleznosci,
+  options = list(
+    paging = FALSE,
+    dom = 'tip',
+    ordering = TRUE,
+    autoWidth = TRUE,
+    rownames = FALSE,
+    columnDefs = list(list(className = 'dt-center', targets = "_all")),
+    drawCallback = JS(
+      'function() {
+        var table = this.api();
+        table.rows().every(function(rowIdx, tableLoop, rowLoop) {
+          if (rowIdx === 1) {
+            $(this.node()).css("background-color", "yellow");
+          }
+        });
+      }'
+    )
+  ),
+  filter = "top",
+  style = "bootstrap",
+  class = 'stripe hover row-border',
+  extensions = c('Buttons', 'Scroller'),
+  selection = 'none',
+  width = "100%"
+)
+
+interaktywna_tabela
+
+```
+
+### Analiza wykazała, że najczęściej spotykanym rozmiarem jest **M**, co oznacza, że produkty w tym rozmiarze muszą być produkowane częściej i będą się szybciej sprzedawać.
+
+<h2 style="text-align: center;">**Która kategoria dominuje?**</h2> 
+<div style="text-align:center; display: flex; justify-content: center; align-items: center;">
+```{r fig.align='center'}
+library(dplyr)
+library(wordcloud2)
+item_frequency <- dane %>% 
+  count(Category) %>% 
+  rename(Frequency = n)
+
+my_colors <- c("orange", "#E9A8F2", "green", "#808000")
+wordcloud2(data = item_frequency, size = 0.5,shape='circle',color = my_colors)
+
+```
+</div>
+### Na powyższym wykresie "chmura słów" przedstawiono częstość występowania różnych kategorii. Największą kategorią jest **Clothing**, podczas gdy najmniejszą ***Outerwear***.Rozmiar czcionki zależy od częstości występowania w danych. Po kliknięciu można zobaczyć częstotliwość występowania kategorii w danych
+
+
+<h2 style="text-align: center;">**Najpopularniejsze kolory odzieży: Trendy i Wyrażanie Stylu**</h2> 
+### Analiza danych dotyczących preferowanych kolorów w odzieży ujawniła, że wśród najpopularniejszych kolorów dominują:
+```{r}
+library(dplyr)
+# Obliczamy liczbę unikalnych wartości w kolumnie 'Color'
+count_unique_colors <- n_distinct(dane$Color)
+
+# Utworzenie tabeli częstości wystąpień każdego koloru
+color_frequency <- table(dane$Color)
+
+# Znalezienie kolorów z największą liczbą wystąpień
+most_common_colors <- names(head(sort(color_frequency, decreasing = TRUE), 5))
+```
+### &nbsp; Oliwkowy &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Żółty &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Srebrny &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Teal &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Zielony
+
+![](colors.png){#image align="center"}
+
+### Pomimo popularnych kolorów roku <span style="color:rgb(0,0,255);">niebieskiego</span> i <span style="color:rgb(255,192,203);">różowego</span>, konsumenci często wybierają odzież opartą na kolorach uniwersalnych i praktycznych w codziennym użytkowaniu.Odcienie, które pasują do różnych stylizacji, a jednocześnie są praktyczne w codziennym użytkowaniu, cieszą się większym zainteresowaniem niż kolory trendy.
+
+<h2 style="text-align: center;">**Rozkład ocen w zależności od popularnych kolorów**</h2> 
+### Wykres gęstości ocen w zależności od popularnych kolorów prezentuje, w jaki sposób oceny produktów rozkładają się w kontekście różnych kolorów.
+```{r fig.align='center'}
+library(dplyr)
+library(ggplot2)
+library(ggridges)
+
+# Tworzenie wykresu gęstości cen w zależności od kategorii produktu
+najpopularniejsze_kolory <- dane %>%
+  filter(!is.na(Color)) %>%
+  count(Color) %>%
+  top_n(5) %>%
+  arrange(desc(n)) %>%
+  pull(Color)
+
+# Nowa paleta kolorów
+nowa_paleta_kolorow <- c("#008000", "#808000", "#C0C0C0", "#008080", "#FFFF00")
+
+ggplot(data = dane %>% filter(Color %in% najpopularniejsze_kolory), 
+       aes(x = Review_Rating, y = Color, fill = Color)) +
+  geom_density_ridges(alpha = 0.6) +
+  scale_fill_manual(values = nowa_paleta_kolorow) + 
+  theme_ridges() +
+  labs(title = " ", x = "Ocena", y = "Kolory") +
+  theme(legend.position = "right")
+
+```
+
+
+### Z wykresu wynika, że duża liczba produktów w kolorze <span style="background-color: rgb(255,255,0);">żółtym</span> ma wyższą ocenę, natomiast produkty w kolorze "Teal" i zielonym mają większą liczbę średnich ocen. Pokazuje to, jakie kolory bardziej podobają się klientom
+
+
+ <h2 style="text-align: center;">**Podsumowanie analizy preferencji klientów w świecie odzieży:**</h2>
+
+### Zrozumienie opinii klientów pozwala na ciągłe doskonalenie oferty. 
+ * <span style="font-size: 150%;">Średnia ocena recenzji jest podobna w kategoriach odzieży, obuwia i akcesoriów, ale odzież wierzchnia oraz odzież mają więcej negatywnych recenzji. </span>
+
+* <span style="font-size: 150%;">Mężczyźni częściej dokonują zakupów.</span>
+* <span style="font-size: 150%;">Bluzki, biżuteria i spodnie są najpopularniejsze. Promocje oraz większa różnorodność tych produktów mogą przynieść korzyści.</span>
+* <span style="font-size: 150%;">Największą kategorią jest Clothing.</span>
+* <span style="font-size: 150%;">Dorośli robią zakupy częściej, ale płacą mniej.</span>
+* <span style="font-size: 150%;">Przy lokalizacji nowych sklepów warto zwrócić uwagę na następujące stany:Montana, Idaho, Nevada, Kalifornia i Illinois.</span>
+* <span style="font-size: 150%;">Rozmiar M jest najczęściej spotykanym.</span>
+* <span style="font-size: 150%;">Dominują kolor oliwkowy, żółty, srebrny, teal i zielony.</span>
+
+
+
+ <h2 style="text-align: center;">**Źródła informacji:**</h2>
+### 1) [www.kaggle.com](https://www.kaggle.com)
+### 2) [www.colorhunt.co](https://colorhunt.co/)
+
+
+
+
