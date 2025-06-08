@@ -18,9 +18,10 @@ Celem projektu jest analiza danych pochodzących ze sklepu odzieżowego w celu z
 
 ## Zawartość repozytorium
 
-- `projekt.html` – pełny raport z analizą
-- Zbiór danych ze strony: [Kaggle.com](https://www.kaggle.com)
-
+- `Wizualizacja_zachowań_zakupowych.Rmd` – główny plik w formacie R Markdown z kodem i analizą wizualną
+- `Wizualizacja_zachowań_zakupowych.html` – wersja renderowana (gotowy raport HTML)
+- `shopping.csv` – zestaw danych dotyczących zachowań zakupowych klientów
+- `README.md` – opis projektu, jego celu, narzędzi i struktury
 ---
 
 ## Wnioski z analizy
